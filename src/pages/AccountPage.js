@@ -15,7 +15,7 @@ import { Package } from "lucide-react";
 // Mock user data - todo: remove mock functionality
 const mockUser = {
   id: '1',
-  name: 'Sarah Johnson',
+  name: 'Ojas Gharde',
   email: 'sarah@example.com',
   username: 'sarah.eco',
   joinedAt: '2023-06-15',
