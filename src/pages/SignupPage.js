@@ -31,35 +31,71 @@ export default function SignupPage({ onSuccess }) {
 
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Make actual API call to backend
+      const response = await fetch('http://localhost:5001/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setShowOTPModal(true);
+        console.log('Signup successful:', data);
+      } else {
+        console.error('Signup failed:', data.message);
+        alert(data.message || 'Signup failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Signup error:', error);
+      alert('Network error. Please check if the backend server is running.');
+    } finally {
       setIsLoading(false);
-      setShowOTPModal(true);
-      console.log('Signup submitted:', formData);
-    }, 1000);
+    }
   };
 
-  const handleOTPVerify = (otp) => {
-    console.log('OTP verified:', otp);
-    setShowOTPModal(false);
-    setIsVerified(true);
-    
-    // Store user data in localStorage - todo: remove mock functionality
-    const users = JSON.parse(localStorage.getItem('secondleaf_users') || '[]');
-    const newUser = {
-      id: Date.now().toString(),
-      ...formData,
-      joinedAt: new Date().toISOString().split('T')[0],
-      avatar: `https://images.unsplash.com/photo-1494790108755-2616b332e234?w=150`
-    };
-    users.push(newUser);
-    localStorage.setItem('secondleaf_users', JSON.stringify(users));
-    localStorage.setItem('secondleaf_current_user', JSON.stringify(newUser));
-    
-    // Call success callback after short delay to show success state
-    setTimeout(() => {
-      onSuccess?.();
-    }, 1500);
+  const handleOTPVerify = async (otp) => {
+    try {
+      // Make API call to verify OTP
+      const response = await fetch('http://localhost:5001/api/auth/verify-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          otp: otp,
+          type: 'verification'
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        console.log('OTP verified successfully:', data);
+        setShowOTPModal(false);
+        setIsVerified(true);
+        
+        // Store user data and token
+        localStorage.setItem('secondleaf_token', data.data.token);
+        localStorage.setItem('secondleaf_current_user', JSON.stringify(data.data.user));
+        
+        // Call success callback after short delay to show success state
+        setTimeout(() => {
+          onSuccess?.();
+        }, 1500);
+      } else {
+        console.error('OTP verification failed:', data.message);
+        alert(data.message || 'OTP verification failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('OTP verification error:', error);
+      alert('Network error during OTP verification. Please try again.');
+    }
   };
 
   const isFormValid = () => {

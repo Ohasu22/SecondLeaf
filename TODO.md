@@ -1,0 +1,5 @@
+- [x] Remove duplicate index declarations in User.js (email and username)
+- [x] Remove duplicate index declaration in OTP.js (expiresAt)
+- [x] Remove deprecated MongoDB options in database.js
+- [x] Change server port from 5000 to 5001 in server.js
+- [x] Test server restart
